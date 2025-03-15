@@ -2,35 +2,42 @@ package ispatecgestapprov.demo.entities;
 
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
 @Entity
-public class retour extends idclass{
+public class retour extends idclass {
 
-    @Column(name="date_retour", unique = false, nullable = false)
+    @Column(name="date_retour", nullable = false)
     private LocalDate date_retour;
 
-    @Column(name="note", unique = false, nullable = false)
+    @Column(name="note", nullable = true)
     private String note;
 
-    @Column(name="statut", unique = false, nullable = false)// Pour indiquer l'état actuel du retour.... "En cours, Terminé" 
-    private String statut;
-
-    // Colonne JSON pour les articles
-    @Column(name = "articles", columnDefinition = "json")
-    private String articles; // Stocke JSON sous forme de chaîne
+    @Column(name="statut", nullable = false)
+    private String statut; // Ex: "En cours", "Terminé"
 
     @ManyToOne
-    @JoinColumn(name="founisseur_id")
+    @JoinColumn(name="fournisseur_id")
     private fournisseur fournisseurs;
 
     @ManyToOne
     @JoinColumn(name="commande_id")
     private commande commandes;
+
+    @OneToMany(mappedBy = "retours", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<ligneRetour> ligneRetours = new ArrayList<>();
 
     public LocalDate getDate_retour() {
         return date_retour;
@@ -56,14 +63,6 @@ public class retour extends idclass{
         this.statut = statut;
     }
 
-    public String getArticles() {
-        return articles;
-    }
-
-    public void setArticles(String articles) {
-        this.articles = articles;
-    }
-
     public fournisseur getFournisseurs() {
         return fournisseurs;
     }
@@ -80,16 +79,15 @@ public class retour extends idclass{
         this.commandes = commandes;
     }
 
-    
-    
+    public List<ligneRetour> getLigneRetours() {
+        return ligneRetours;
+    }
 
-
-
-
-
-
-
+    public void setLigneRetours(List<ligneRetour> ligneRetours) {
+        this.ligneRetours = ligneRetours;
+    }
 
     
 
+   
 }

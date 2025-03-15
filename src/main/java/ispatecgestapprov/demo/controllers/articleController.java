@@ -168,6 +168,8 @@ public class articleController {
 
     }
 
+    
+
     @GetMapping("/articles/fournisseur/{fournisseurId}")
     public ResponseEntity<List<article>> getArticlesByFournisseur(@PathVariable int fournisseurId) {
         List<article> articles = articleRepository.findByFournisseurs_Id(fournisseurId);
@@ -216,6 +218,41 @@ public class articleController {
 
         return ResponseEntity.ok(result);
     }
+
+        //  Lister les articles d’un fournisseur qui sont en attente ou partiellement reçus
+    @GetMapping("/articles/fournisseur/{id}/retours")
+    public ResponseEntity<List<Map<String, Object>>> getArticlesRetourFournisseur(@PathVariable int id) {
+        List<ligneCommande> lignes = ligneCommandeRepository.findArticlesEnAttenteOuPartiellementRecu(id);
+
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (ligneCommande ligne : lignes) {
+            Map<String, Object> ligneData = new HashMap<>();
+            ligneData.put("id", ligne.getId());
+            ligneData.put("quantite_commandee", ligne.getQuantite_commandee());
+            ligneData.put("quantite_recue", ligne.getQuantite_recue());
+            ligneData.put("prix_achat", ligne.getPrix_achat());
+            ligneData.put("statut", ligne.getStatut());
+
+            // Ajouter les informations de l'article
+            if (ligne.getArticles() != null) {
+                Map<String, Object> articleData = new HashMap<>();
+                articleData.put("id", ligne.getArticles().getId());
+                articleData.put("description", ligne.getArticles().getDescription());
+                articleData.put("code_barre", ligne.getArticles().getCode_barre());
+                articleData.put("site", ligne.getArticles().getSites() != null ? ligne.getArticles().getSites().getNom() : null);
+                ligneData.put("articles", articleData);
+            }
+
+            // Ajouter le numéro de suivi de la commande
+            ligneData.put("numerosuivi", ligne.getCommandes() != null ? ligne.getCommandes().getNumerosuivi() : null);
+
+            result.add(ligneData);
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
 
 
 
